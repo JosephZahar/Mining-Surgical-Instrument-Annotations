@@ -77,6 +77,7 @@ timeseries_compressed_10k = timeseries_compressed_10k_df.seq.values
 
 
 def autocorr_dash(seq, surgery_number):
+    surgery_number = int(surgery_number[10:])-1
     if seq == 'Low Compression':
         timeseries = timeseries_compressed_10k
         reduct = 10000
@@ -346,11 +347,11 @@ def autocorr_dash(seq, surgery_number):
 
 
 fig1, fig2, fig3, fig4, fig5, fig6, fig7, indicators_1, indicators_2 = autocorr_dash(
-    seq='Medium Compression', surgery_number=5)
-surgery_dropdown = dcc.Dropdown(options=[i for i in range(len(timeseries_compressed_10k))],
+    seq='Medium Compression', surgery_number='Procedure 5')
+surgery_dropdown = dcc.Dropdown(options=[f'Procedure {str(i+1)}' for i in range(len(timeseries_compressed_10k))],
                                 id='surgery_number',
                                 clearable=False,
-                                value=5, className="dbc",
+                                value='Procedure 5', className="dbc",
                                 placeholder='Select a Surgery', maxHeight=100)
 
 smoothing_dropdown = dcc.Dropdown(options=['Low Compression', 'Medium Compression', 'High Compression'],
@@ -359,12 +360,27 @@ smoothing_dropdown = dcc.Dropdown(options=['Low Compression', 'Medium Compressio
                                   value='Medium Compression',
                                   placeholder='Select a Smoothness')
 
+def Navbar():
+    layout = html.Div([
+        dbc.NavbarSimple(
+            brand="Mining Surgical Instrument Annotations",
+            id="navbar",
+            color="dark",
+            dark=True,
+            brand_style={'fontSize': '30px', 'textAlign': 'center', 'width': '100%'}
+        ),
+    ])
+
+    return layout
+
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
                 meta_tags=[{"name": "viewport", "content": "width=device-width"}])
 server = app.server
 
+navbar_layout = Navbar()
 app.layout = dbc.Container(
-    [dbc.Row(dbc.Col(html.H2('Autocorrelation Clustering Analysis', className='text-center text-primary, mb-3'))),
+    [navbar_layout,
+     # dbc.Row(dbc.Col(html.H2('Autocorrelation Clustering Analysis', className='text-center text-primary, mb-3'))),
      #dbc.Row(dbc.Col(html.H3(id='account_name', children=account_name, className='text-center text-primary, mb-3'))),
      dbc.Row([dbc.Col(surgery_dropdown),
               dbc.Col(smoothing_dropdown)]),
@@ -445,4 +461,4 @@ def callback_function(smoothing_name, surgery_number):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, use_reloader=False, port=8053)
+    app.run_server(debug=False, port=8053)
