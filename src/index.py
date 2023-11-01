@@ -361,6 +361,7 @@ smoothing_dropdown = dcc.Dropdown(options=['Low Compression', 'Medium Compressio
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
                 meta_tags=[{"name": "viewport", "content": "width=device-width"}])
+server = app.server
 
 app.layout = dbc.Container(
     [dbc.Row(dbc.Col(html.H2('Autocorrelation Clustering Analysis', className='text-center text-primary, mb-3'))),
