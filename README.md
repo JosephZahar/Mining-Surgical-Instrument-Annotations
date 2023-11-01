@@ -13,8 +13,20 @@ Follow these steps to get the project up and running:
 First, clone the repository to your local machine:
 
 ```bash
-git clone [Your Repository URL]
-cd [Your Repository Name]
+git clone https://github.com/JosephZahar/Mining-Surgical-Instrument-Annotations.git
+cd Mining-Surgical-Instrument-Annotations
 ```
-Issue 1: Description of the issue.
-Solution: Steps or considerations to solve it.
+
+### 2. Install Dependencies
+Install the required packages using pip:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the Project
+Once the dependencies are installed, you can run the project:
+
+```bash
+python index.py
+```
