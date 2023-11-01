@@ -36,32 +36,7 @@ def flatten_r(L):
 
 PATH = pathlib.Path(__file__).parent.parent
 DATA_PATH = PATH.joinpath("data").resolve()
-df = pd.read_csv(DATA_PATH.joinpath('rp_proportional_durations.csv')) \
-    .loc[:, ['video_uuid', 'surgeon_uuid', 'Account', 'content', 'content_type', 'start', 'end']]
 
-df_tool = df[df['content_type'] == 'tooling'].drop_duplicates(subset=None, keep="first", inplace=False)
-df_phase = df[df['content_type'] == 'phase'].drop_duplicates(subset=None, keep="first", inplace=False)
-df_phase = df_phase.merge(right=df_tool['video_uuid'], how='inner', on='video_uuid')
-df_phase = df_phase.drop_duplicates(subset=None, keep="first", inplace=False)
-
-df_phase['start_end'] = df_phase.loc[:, ['start', 'end']].values.tolist()
-grouped_phase = df_phase.groupby(['video_uuid', 'content'])['start_end'].apply(list).reset_index()
-max_time = df_phase.groupby('video_uuid')['end'].max()
-grouped_phase = grouped_phase.merge(right=max_time, how='left', on='video_uuid')
-grouped_phase['start_end'] = grouped_phase['start_end'].apply(lambda x: flatten_r(x))
-grouped_phase['start_end2'] = grouped_phase.apply(lambda row: row['start_end'].append(row['end']), axis=1)
-grouped_phase['diff'] = grouped_phase['start_end'].apply(lambda x: np.diff(x))
-grouped_phase = grouped_phase[grouped_phase['content'] != 'Operation Finished']
-
-grouped_phase_content = grouped_phase.groupby('video_uuid')['content'].apply(list).reset_index()
-grouped_phase_time = grouped_phase.groupby('video_uuid')['start_end'].apply(list).reset_index().drop('video_uuid',
-                                                                                                     axis=1)
-grouped_phase_list = pd.concat([grouped_phase_content, grouped_phase_time], axis=1)
-phases_list = grouped_phase_list.content.values
-phases_times = grouped_phase_list.start_end.values
-grouped_phase_list = pd.merge(grouped_phase_list, df_phase.groupby('video_uuid')['Account'].first(), how='inner',
-                              on='video_uuid')
-accounts = grouped_phase_list.Account.values
 
 timeseries_compressed_df = pd.read_csv(DATA_PATH.joinpath('timeseries_compressed_df.csv'))
 timeseries_compressed_df.seq = timeseries_compressed_df.seq.apply(lambda row: ast.literal_eval(row))
@@ -170,7 +145,39 @@ def autocorr_dash(seq, surgery_number):
     fig2.update_layout(xaxis_title="Time", yaxis_title="Instrument", title='Tool Switches Across Time')
     fig2.update_yaxes(categoryorder='array', categoryarray=['None', 'Instrument 1', 'Instrument 2', 'Both instruments'])
 
-    phasess = grouped_phase.groupby('content')['video_uuid'].first().reset_index()['content'].values
+    phasess = ['Bladder Detachment',
+               'Bladder Neck Reconstruction',
+               'Bladder Neck Transection',
+               'DVC Ligation',
+               'DVC Selected Ligation',
+               'DVC and Urethral Transection',
+               'Endopelvic Fascia Incision',
+               'Lymph Node Dissection',
+               'Neurovascular Bundle Separation',
+               'Port Insertion and Access',
+               'Prostatic Pedicles Transection',
+               'Rectum Separation',
+               'Specimen Removal and Closure',
+               'Specimen Retrieval',
+               'Vas and Seminal Vesicles Separation',
+               'Vesicourethral Anastomosis']
+
+    phases_times =  [[0, 1630221.0, 3369292.0, 19848514.0],
+                     [0, 5208673.0, 6650218.0, 19848514.0],
+                     [0, 4568144.0, 5208673.0, 19848514.0],
+                     [0, 11318534.0, 12054187.0, 19848514.0],
+                     [0, 3369292.0, 4568144.0, 19848514.0],
+                     [0, 12575788.0, 14131447.0, 19848514.0],
+                     [0, 10024031.0, 10510743.0, 10664721.0, 11318534.0, 19848514.0],
+                     [0, 45937.0, 1630221.0, 19848514.0],
+                     [0, 9340906.0, 10024031.0, 10510743.0, 10664721.0, 19848514.0],
+                     [0, 8618642.0, 9340906.0, 19848514.0],
+                     [0, 19832383.0, 19848514.0, 19848514.0],
+                     [0, 12054187.0, 12575788.0, 19848514.0],
+                     [0, 6650218.0, 8618642.0, 19848514.0],
+                     [0, 14131447.0, 19832383.0, 19848514.0],
+                     [0, 14131447.0, 19832383.0, 19848514.0],
+                     [0, 14131447.0, 19832383.0, 19848514.0]]
     phase_color_dict = dict()
     random.seed(42)
     colors = ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)])
@@ -178,7 +185,7 @@ def autocorr_dash(seq, surgery_number):
     for phase, color in zip(phasess, colors):
         phase_color_dict[phase] = color
     fig3 = px.line(x=[i for i in range(len(timeseries_lbl))], y=timeseries_lbl, markers=False)
-    for i, value in enumerate(phases_times[surgery_number]):
+    for i, value in enumerate(phases_times):
         phase_color = phase_color_dict[phasess[i]]
         for j in range(1, len(value) - 1, 2):
             fig3.add_shape(type="rect",
@@ -341,7 +348,7 @@ def autocorr_dash(seq, surgery_number):
         margin=dict(l=50, r=50, t=30, b=30)
     )
 
-    account_name = accounts[surgery_number]
+    # account_name = accounts[surgery_number]
 
     return fig1, fig2, fig3, fig4, fig5, fig6, fig7, indicators_1, indicators_2
 
