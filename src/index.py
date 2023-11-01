@@ -46,17 +46,9 @@ timeseries_compressed_100k_df = pd.read_csv(DATA_PATH.joinpath('timeseries_compr
 timeseries_compressed_100k_df.seq = timeseries_compressed_100k_df.seq.apply(lambda row: ast.literal_eval(row))
 timeseries_compressed_100k = timeseries_compressed_100k_df.seq.values
 
-timeseries_compressed_10k_df = pd.read_csv(DATA_PATH.joinpath('timeseries_compressed_10k_df.csv'))
-timeseries_compressed_10k_df.seq = timeseries_compressed_10k_df.seq.apply(lambda row: ast.literal_eval(row))
-timeseries_compressed_10k = timeseries_compressed_10k_df.seq.values
-
-
 def autocorr_dash(seq, surgery_number):
     surgery_number = int(surgery_number[10:])-1
-    if seq == 'Low Compression':
-        timeseries = timeseries_compressed_10k
-        reduct = 10000
-    elif seq == 'Medium Compression':
+    if seq == 'Medium Compression':
         timeseries = timeseries_compressed
         reduct = 50000
     else:
@@ -178,6 +170,7 @@ def autocorr_dash(seq, surgery_number):
                      [0, 14131447.0, 19832383.0, 19848514.0],
                      [0, 14131447.0, 19832383.0, 19848514.0],
                      [0, 14131447.0, 19832383.0, 19848514.0]]
+
     phase_color_dict = dict()
     random.seed(42)
     colors = ["#" + ''.join([random.choice('0123456789ABCDEF') for j in range(6)])
@@ -348,23 +341,21 @@ def autocorr_dash(seq, surgery_number):
         margin=dict(l=50, r=50, t=30, b=30)
     )
 
-    # account_name = accounts[surgery_number]
-
     return fig1, fig2, fig3, fig4, fig5, fig6, fig7, indicators_1, indicators_2
 
 
 fig1, fig2, fig3, fig4, fig5, fig6, fig7, indicators_1, indicators_2 = autocorr_dash(
     seq='Medium Compression', surgery_number='Procedure 5')
-surgery_dropdown = dcc.Dropdown(options=[f'Procedure {str(i+1)}' for i in range(len(timeseries_compressed_10k))],
+surgery_dropdown = dcc.Dropdown(options=[f'Procedure {str(i+1)}' for i in range(len(timeseries_compressed_100k))],
                                 id='surgery_number',
                                 clearable=False,
                                 value='Procedure 5', className="dbc",
                                 placeholder='Select a Surgery', maxHeight=100)
 
-smoothing_dropdown = dcc.Dropdown(options=['Low Compression', 'Medium Compression', 'High Compression'],
+smoothing_dropdown = dcc.Dropdown(options=['Medium Compression', 'High Compression'],
                                   id='smoothing_name',
                                   clearable=False, className="dbc",
-                                  value='Medium Compression',
+                                  value='High Compression',
                                   placeholder='Select a Smoothness')
 
 def Navbar():
