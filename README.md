@@ -25,6 +25,7 @@ cd Mining-Surgical-Instrument-Annotations
 Install the required packages using pip:
 
 ```bash
+cd src
 pip install -r requirements.txt
 ```
 
